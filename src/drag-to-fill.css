@@ -1,0 +1,12 @@
+.zambezi-grid-fill-handle {
+  position: absolute;
+  left: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+  background: red;
+  border: 1px solid white;
+  margin-top: -5px;
+  margin-left: -5px;
+  cursor: crosshair;
+}

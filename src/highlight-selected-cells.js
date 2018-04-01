@@ -4,13 +4,27 @@ import { select } from 'd3-selection'
 
 import './highlight-selected-cells.css'
 
-const highlightContainer = appendIfMissing('div.selected-cells-highlight.zambezi-grid-overlay')
+let renderCount = 0
+
+const GRID_OVERLAY_SELECTOR = 'div.selected-cells-highlight.zambezi-grid-overlay'
+
+const createHighlightContainer = () => {
+  const selector = renderCount === 0
+    ? GRID_OVERLAY_SELECTOR
+    : `${GRID_OVERLAY_SELECTOR}-${renderCount}`
+
+  renderCount++
+    
+  return appendIfMissing(selector)
+}
+
 const borderDirty = selectionChanged()
 
 export function createHighlightSelectedCells () {
   let selectedCells = []
   let borderCache
   let borderRedrawGen = 0
+  const highlightContainer = createHighlightContainer()
 
   function highlightSelectedCells (s) {
     s.each(highlightSelectedCellsEach)

@@ -1,0 +1,46 @@
+<!doctype html>
+<meta charset="utf-8" />
+
+<link rel="stylesheet" type="text/css" href="../node_modules/normalize.css/normalize.css">
+<script src="../node_modules/underscore/underscore.js"></script>
+<script src="../node_modules/d3/build/d3.js"></script>
+<script src="../node_modules/@zambezi/d3-utils/dist/d3-utils.js"></script>
+<script src="../node_modules/@zambezi/fun/dist/fun.js"></script>
+<script src="../node_modules/faker/faker.js"></script>
+<script src="../node_modules/@zambezi/grid/dist/grid.js"></script>
+<script src="../dist/grid-components.js"></script>
+
+<div class="grid-target"></div>
+
+<script>
+    const rows = _.range(1, 500).map(faker.Helpers.createCard)
+        , dragToFill = gridComponents.createDragToFill()
+            .on('dragend', d => console.log(d))
+        , table = grid.createGrid()
+            .columns(
+                [
+                    { key: 'name', width: 200 }
+                    , { key: 'username' }
+                    , { key: 'email' }
+                    , {
+                        label: 'some synthetic column'
+                        , format: r => `${r.username.slice(0, 3)} -- ${r.address.city}`
+                        , sort: (a, b) => d3.ascending(a.name, b.name)
+                    }
+                    , { key: 'phone' }
+                    , { label: 'changed', format: () => _.uniqueId('ch:') }
+                ]
+            )
+            .usePre(
+                gridComponents.createCellSelection()
+                    .on('cell-selected-change.fillhandle', dragToFill.selectedCells)
+                    .on('cell-selected-update.fillhandle', dragToFill.selectedCells)
+            )
+            .use(dragToFill)
+            .resizeColumnsByDefault(false)
+
+        , target = d3.select('.grid-target')
+            .style('height', '500px')
+            .datum(rows)
+            .call(table)
+</script>
