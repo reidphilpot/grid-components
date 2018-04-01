@@ -58,7 +58,7 @@
 
   d3.select('#programmatic-select')
       .on('click.clear', () => console.clear())
-      .on('click.reset', () => { console.log(bunchOfCells()); cells.selected(bunchOfCells()) })
+      .on('click.reset', () => cells.selected(bunchOfCells()))
       .on('click.redraw', () => target.call(table))
 
   d3.select('#programmatic-select-by-indices')
