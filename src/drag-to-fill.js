@@ -7,7 +7,7 @@ import { createHighlightSelectedCells } from './highlight-selected-cells'
 import { unwrap } from '@zambezi/grid'
 import './drag-to-fill.css'
 
-const highlightContainer = appendIfMissing('div.zambezi-grid-fill-handle-container')
+const fillHandleContainer = appendIfMissing('div.zambezi-grid-fill-handle-container')
 
 const rangeFromUnorderedIndices = (array, i1, i2) =>
   array.slice(Math.min(i1, i2), Math.max(i1, i2) + 1)
@@ -49,7 +49,7 @@ export function createDragToFill () {
       .select('.zambezi-grid-body')
 
     container
-      .select(highlightContainer)
+      .select(fillHandleContainer)
       .style('transform', `translate(${-scroll.left}px, ${-scroll.top}px)`)
       .call(renderFillHandle)
 
@@ -100,10 +100,10 @@ export function createDragToFill () {
         .merge(enter)
         .attr('class', null)
         .classed('zambezi-grid-fill-handle', true)
-        .each(configureHighlightCell)
+        .each(configureFillHandleCell)
     }
 
-    function configureHighlightCell (d, i) {
+    function configureFillHandleCell (d) {
       const { column, row } = d
       const rowIndex = findIndex(rows, row)
 
