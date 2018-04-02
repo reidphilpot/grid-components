@@ -18,7 +18,6 @@ export function createDragToFill () {
 
   const dispatch = createDispatch('dragend')
   const fillHighlight = createHighlightSelectedCells()
-  
   const api = rebind().from(dispatch, 'on')
 
   const drag = createDrag()
@@ -43,6 +42,7 @@ export function createDragToFill () {
 
   function dragToFillEach({ columns, dispatcher, rows, scroll, rowHeight }) {
     const columnById = indexBy(columns, 'id')
+    const findRowIndex = row => findIndex(rows, row)
     const fillHandleDatum = compileFillHandleDatum()
     
     container = select(this)
@@ -55,28 +55,31 @@ export function createDragToFill () {
 
     function activate () {
       container
-        .on('mouseover.drag-to-fill', function () {
-          const d = select(d3.event.target).datum()
-          const cellsToFill = mouseSelection(fillHandleDatum[0], d)
-
-          if (cellsToFill) {
-            fillHighlight.selectedCells(cellsToFill)
-            requestAnimationFrame(redraw)
-          }
-        })
+        .on('mouseover.drag-to-fill', drawFillHightlight)
     }
 
-    function mouseSelection (active, d) {
-      const column = d.column
-      const columnId = column.id
-      const row = unwrap(d.row)
-      const cell = { row, column }
-      const rowIndex = findIndex(rows, row)
-      const activeRowIndex = findIndex(rows, active.row)
+    function drawFillHightlight () {
+      const d = select(d3.event.target).datum()
+      const cellsToFill = mouseSelection(fillHandleDatum[0], d)
 
-      return (active.column.id !== columnId && activeRowIndex !== rowIndex)
-        ? []
-        : addRangeToSelection(active, cell)
+      if (fillHighlight.selectedCells().length !== cellsToFill.length) {
+        fillHighlight.selectedCells(cellsToFill)
+        requestAnimationFrame(redraw)
+      }
+    }
+
+    function mouseSelection (activeCell, currentCell) {
+      if (!activeCell || !currentCell) return []
+
+      const column = currentCell.column
+      const row = unwrap(currentCell.row)
+
+      return (
+        activeCell.column.id === column.id ||
+        findRowIndex(activeCell.row) === findRowIndex(row)
+      )
+        ? addRangeToSelection(activeCell, { row, column })
+        : []
     }
 
     function renderFillHandle (sel) {
@@ -105,7 +108,7 @@ export function createDragToFill () {
 
     function configureFillHandleCell (d) {
       const { column, row } = d
-      const rowIndex = findIndex(rows, row)
+      const rowIndex = findRowIndex(row)
 
       select(this)
         .style('top', `${(rowIndex + 1) * rowHeight}px`)
@@ -125,8 +128,8 @@ export function createDragToFill () {
       )
       const rowRange = rangeFromUnorderedIndices(
         rows,
-        findIndex(rows, r => unwrap(r) === a.row),
-        findIndex(rows, r => unwrap(r) === b.row)
+        findRowIndex(r => unwrap(r) === a.row),
+        findRowIndex(r => unwrap(r) === b.row)
       ).map(unwrap)
 
       const allCellsInColumns = (acc, row) =>
